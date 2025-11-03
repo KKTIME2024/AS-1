@@ -1,0 +1,61 @@
+class BudgetTrackerApp {
+    - Flask app
+    - SQLAlchemy db
+    + run()
+}
+
+class Income {
+    - id: int
+    - name: string
+    - amount: float
+    - date_created: datetime
+    + save()
+    + delete()
+    + update()
+}
+
+class Expenditure {
+    - id: int
+    - name: string
+    - amount: float
+    - date_created: datetime
+    + save()
+    + delete()
+    + update()
+}
+
+class SavingsGoal {
+    - id: int
+    - name: string (optional)
+    - target_amount: float
+    - date_created: datetime
+    + save()
+    + delete()
+    + update()
+    + calculate_progress(total_income, total_expenditure): float
+}
+
+class FormValidator {
+    + validate_income_form(data): bool
+    + validate_expenditure_form(data): bool
+    + validate_goal_form(data): bool
+    + client_side_validation()
+    + server_side_validation()
+}
+
+class HomePageController {
+    + show_analytics()
+    + get_total_income(): float
+    + get_total_expenditure(): float
+    + get_balance(): float
+    + get_goal_progress(): float
+}
+
+BudgetTrackerApp --> Income
+BudgetTrackerApp --> Expenditure
+BudgetTrackerApp --> SavingsGoal
+BudgetTrackerApp --> FormValidator
+BudgetTrackerApp --> HomePageController
+Income --> SQLAlchemy
+Expenditure --> SQLAlchemy
+SavingsGoal --> SQLAlchemy
