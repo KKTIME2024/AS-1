@@ -1,0 +1,27 @@
+budget_tracker/
+├── app/
+│   ├── __init__.py          # Flask应用工厂函数
+│   ├── models.py            # 数据模型定义
+│   ├── routes/              # 路由模块
+│   │   ├── __init__.py
+│   │   ├── home.py          # 主页路由
+│   │   ├── incomes.py       # 收入相关路由
+│   │   └── expenses.py      # 支出相关路由
+│   ├── templates/           # Jinja2模板
+│   │   ├── base.html        # 基础模板
+│   │   └── home.html        # 主页模板
+│   └── static/             # 静态资源
+│       ├── css/
+│       ├── js/
+│       └── images/
+├── instance/                # 实例文件夹（数据库文件等）
+├── migrations/              # 数据库迁移脚本（后续添加）
+├── config.py               # 配置文件
+├── requirements.txt        # 依赖列表
+└── run.py                 # 应用启动入口
+
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-WTF==1.1.1
+WTForms==3.0.1
+python-dotenv==1.0.0
