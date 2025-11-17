@@ -1,0 +1,32 @@
+<!--首页-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记账应用 - {% block title %}首页{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">记账应用</h1>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}">首页</a></li>
+                <li><a href="{{ url_for('incomes') }}">收入</a></li>
+                <li><a href="{{ url_for('expenditures') }}">支出</a></li>
+                <li><a href="{{ url_for('transaction') }}">交易记录</a></li>
+                <li><a href="{{ url_for('goal') }}">目标</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 记账应用</p>
+    </footer>
+</body>
+</html>
