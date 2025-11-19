@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-db = SQLAlchemy()
+db = SQLAlchemy()  # 初始化 db
 
 class Income(db.Model):
     """收入数据模型 - 移除了名称唯一性约束"""
