@@ -1,13 +1,125 @@
-{% extends "base.html" %}
-
-{% block title %}交易记录{% endblock %}
-
-{% block content %}
-<div class="page-header">
-    <h2>交易记录</h2>
-    <p>这是交易记录页面</p>
-</div>
-<div class="content">
-    <p>交易记录功能待实现...</p>
-</div>
-{% endblock %}
+{% extends "base.html" %} 
+ 
+ {% block title %}交易记录{% endblock %} 
+ 
+ {% block content %} 
+ <div class="page-header"> 
+     <h2>交易记录</h2> 
+     <p>查看所有收入和支出记录</p> 
+ </div> 
+ 
+ <div class="content"> 
+     <!-- 收入记录部分 -->
+     <div class="transaction-section">
+         <h3>收入记录</h3>
+         {% if incomes %}
+         <table class="transaction-table">
+             <thead>
+                 <tr>
+                     <th>名称</th>
+                     <th>金额</th>
+                     <th>描述</th>
+                     <th>日期</th>
+                 </tr>
+             </thead>
+             <tbody>
+                 {% for income in incomes %}
+                 <tr>
+                     <td>{{ income.name }}</td>
+                     <td class="amount income-amount">+{{ income.amount }}</td>
+                     <td>{{ income.description if income.description else '-' }}</td>
+                     <td>{{ income.created_at.split('T')[0] }}</td>
+                 </tr>
+                 {% endfor %}
+             </tbody>
+         </table>
+         {% else %}
+         <p class="no-data">暂无收入记录</p>
+         {% endif %}
+     </div>
+     
+     <!-- 支出记录部分 -->
+     <div class="transaction-section">
+         <h3>支出记录</h3>
+         {% if expenditures %}
+         <table class="transaction-table">
+             <thead>
+                 <tr>
+                     <th>名称</th>
+                     <th>金额</th>
+                     <th>描述</th>
+                     <th>分类</th>
+                     <th>日期</th>
+                 </tr>
+             </thead>
+             <tbody>
+                 {% for expenditure in expenditures %}
+                 <tr>
+                     <td>{{ expenditure.name }}</td>
+                     <td class="amount expenditure-amount">-{{ expenditure.amount }}</td>
+                     <td>{{ expenditure.description if expenditure.description else '-' }}</td>
+                     <td>{{ expenditure.category if expenditure.category else '-' }}</td>
+                     <td>{{ expenditure.created_at.split('T')[0] }}</td>
+                 </tr>
+                 {% endfor %}
+             </tbody>
+         </table>
+         {% else %}
+         <p class="no-data">暂无支出记录</p>
+         {% endif %}
+     </div>
+ </div>
+ 
+ <style>
+     .transaction-section {
+         margin-bottom: 30px;
+         padding: 20px;
+         background-color: #f9f9f9;
+         border-radius: 8px;
+         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+     }
+     
+     .transaction-table {
+         width: 100%;
+         border-collapse: collapse;
+         margin-top: 15px;
+     }
+     
+     .transaction-table th,
+     .transaction-table td {
+         padding: 12px;
+         text-align: left;
+         border-bottom: 1px solid #ddd;
+     }
+     
+     .transaction-table th {
+         background-color: #4CAF50;
+         color: white;
+         font-weight: bold;
+     }
+     
+     .transaction-table tr:hover {
+         background-color: #f5f5f5;
+     }
+     
+     .amount {
+         font-weight: bold;
+         text-align: right;
+     }
+     
+     .income-amount {
+         color: #4CAF50;
+     }
+     
+     .expenditure-amount {
+         color: #f44336;
+     }
+     
+     .no-data {
+         text-align: center;
+         color: #777;
+         padding: 20px;
+         font-style: italic;
+     }
+ </style>
+ {% endblock %}

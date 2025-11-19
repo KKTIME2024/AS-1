@@ -1,36 +1,74 @@
 from flask import render_template, redirect, url_for, request, flash
-from models import Income, Expense, Goal
+import sys
+import os
+
+# Add the current directory to Python path to ensure imports work correctly
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 def register_routes(app, db):
-    # db实例作为参数传入，避免循环导入问题
-
+    # 确保所有模型使用同一个db实例
+    # 这里我们需要在应用上下文中导入模型
+    
+    # 首页路由
     @app.route('/')
     def index():
         return render_template('index.html')
-
+    
+    # 收入管理页面路由
     @app.route('/incomes')
     def incomes():
         return render_template('incomes.html')
-
+    
+    # 添加收入路由
     @app.route('/add_income', methods=['POST'])
     def add_income():
-        # 使用通过register_routes传入的db实例
-        name = request.form['name']
-        amount = float(request.form['amount'])
-        description = request.form['description']
-        new_income = Income(name=name, amount=amount, description=description)
-        db.session.add(new_income)
-        db.session.commit()
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Income
+            name = request.form['name']
+            amount = float(request.form['amount'])
+            description = request.form.get('description', '')
+            new_income = Income(name=name, amount=amount, description=description)
+            db.session.add(new_income)
+            db.session.commit()
         return redirect(url_for('incomes'))
-
+    
+    # 支出管理页面路由
     @app.route('/expenditures')
     def expenditures():
         return render_template('expenditures.html')
-
+    
+    # 添加支出路由
+    @app.route('/add_expenditure', methods=['POST'])
+    def add_expenditure():
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Expense
+            name = request.form['name']
+            amount = float(request.form['amount'])
+            description = request.form.get('description', '')
+            category = request.form.get('category', '')
+            new_expenditure = Expense(name=name, amount=amount, description=description, category=category)
+            db.session.add(new_expenditure)
+            db.session.commit()
+        return redirect(url_for('expenditures'))
+    
+    # 目标页面路由
     @app.route('/goal')
     def goal():
         return render_template('goal.html')
-
+    
+    # 交易记录页面路由 - GET请求直接显示所有记录
     @app.route('/transaction')
     def transaction():
-        return render_template('transaction.html')
+        with app.app_context():
+            # 在应用上下文中导入模型并执行查询
+            from models import Income, Expense
+            # 查询所有收入和支出记录
+            incomes = Income.query.all()
+            expenditures = Expense.query.all()
+            # 转换为字典格式
+            incomes_dict = [income.to_dict() for income in incomes]
+            expenditures_dict = [expenditure.to_dict() for expenditure in expenditures]
+            # 渲染模板并传递数据
+            return render_template('transaction.html', incomes=incomes_dict, expenditures=expenditures_dict)
