@@ -28,15 +28,21 @@
                 <div class="goal-item">
                     <div class="goal-header">
                         <h4>{{ goal.name }}</h4>
-                        <span class="goal-date">创建于：{{ goal.created_at.split('T')[0] }}</span>
+                        <div class="goal-actions">
+                            <button class="edit-btn" onclick="openEditModal({{ goal.id }}, '{{ goal.name }}', {{ goal.target_amount }}, '{{ goal.description|escape }}')">编辑</button>
+                            <form action="{{ url_for('delete_goal', goal_id=goal.id) }}" method="POST" onsubmit="return confirm('确定要删除这个目标吗？');">
+                                <button type="submit" class="delete-btn">删除</button>
+                            </form>
+                        </div>
                     </div>
+                    <div class="goal-date">创建于：{{ goal.created_at.split('T')[0] }}</div>
                     <div class="goal-progress">
-                        <div class="progress-bar" style="--progress: {{ goal.progress_percentage }}%">
+                        <div class="progress-bar" style="--progress: {{ [goal.progress_percentage, 0]|max }}%">
                             <div class="progress-fill"></div>
                           </div>
                         <div class="progress-text">
                             ¥{{ "%.2f"|format(goal.current_amount) }} / ¥{{ "%.2f"|format(goal.target_amount) }}
-                            ({{ "%.1f"|format(goal.progress_percentage) }}%)
+                            ({{ "%.1f"|format([goal.progress_percentage, 0]|max) }}%)
                         </div>
                     </div>
                     {% if goal.description %}
@@ -69,7 +75,158 @@
         </form>
     </div>
     
-    <!-- 显示目标列表 -->
+    <!-- 编辑目标的模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑储蓄目标</h3>
+                <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editGoalForm" action="" method="POST">
+                <input type="hidden" id="editGoalId" name="goal_id">
+                <div class="form-group">
+                    <label for="editName">目标名称（可选）</label>
+                    <input type="text" id="editName" name="name" placeholder="例如：购买新电脑">
+                </div>
+                <div class="form-group">
+                    <label for="editTargetAmount">目标金额 *</label>
+                    <input type="number" id="editTargetAmount" name="target_amount" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">描述（可选）</label>
+                    <textarea id="editDescription" name="description" rows="3" placeholder="添加关于这个目标的描述..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeEditModal()" class="cancel-btn">取消</button>
+                    <button type="submit" class="save-btn">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- JavaScript 函数用于控制编辑模态框 -->
+    <script>
+        // 打开编辑模态框
+        function openEditModal(id, name, targetAmount, description) {
+            document.getElementById('editGoalId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editTargetAmount').value = targetAmount;
+            document.getElementById('editDescription').value = description || '';
+            
+            // 设置表单的action属性指向正确的路由
+            document.getElementById('editGoalForm').action = '/edit_goal/' + id;
+            
+            // 显示模态框
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            var modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+    
+    <!-- 简单的CSS样式用于模态框 -->
+    <style>
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .edit-btn, .delete-btn, .cancel-btn, .save-btn {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #ccc;
+            color: black;
+        }
+        
+        .save-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    </style>
     
 </div>
 {% endblock %}

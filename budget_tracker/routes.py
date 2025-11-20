@@ -104,7 +104,9 @@ def register_routes(app, db):
                 # 使用实际储蓄金额作为当前进度
                 g['current_amount'] = available_savings
                 if g['target_amount'] > 0:
-                    g['progress_percentage'] = min(100, (available_savings / g['target_amount']) * 100)
+                    # 计算进度百分比，但确保不小于0且不大于100
+                    progress = (available_savings / g['target_amount']) * 100
+                    g['progress_percentage'] = max(0, min(100, progress))
                 else:
                     g['progress_percentage'] = 0
                     
@@ -152,6 +154,63 @@ def register_routes(app, db):
             db.session.add(new_goal)
             db.session.commit()
             flash('储蓄目标添加成功！', 'success')
+        return redirect(url_for('goal'))
+    
+    # 编辑储蓄目标路由
+    @app.route('/edit_goal/<int:goal_id>', methods=['POST'])
+    def edit_goal(goal_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            
+            # 通过主键查找目标
+            goal = Goal.query.get(goal_id)
+            if not goal:
+                flash('错误：未找到该目标！', 'error')
+                return redirect(url_for('goal'))
+            
+            # 获取表单数据并更新目标
+            name = request.form.get('name', '未命名目标')
+            
+            # 服务器端数据验证
+            try:
+                target_amount = float(request.form['target_amount'])
+                # 验证金额必须大于0
+                if target_amount <= 0:
+                    flash('错误：目标金额必须大于0！', 'error')
+                    return redirect(url_for('goal'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('goal'))
+            
+            description = request.form.get('description', '')
+            
+            # 更新目标信息
+            goal.name = name
+            goal.target_amount = target_amount
+            goal.description = description
+            
+            db.session.commit()
+            flash('储蓄目标更新成功！', 'success')
+        return redirect(url_for('goal'))
+    
+    # 删除储蓄目标路由
+    @app.route('/delete_goal/<int:goal_id>', methods=['POST'])
+    def delete_goal(goal_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            
+            # 通过主键查找目标
+            goal = Goal.query.get(goal_id)
+            if not goal:
+                flash('错误：未找到该目标！', 'error')
+                return redirect(url_for('goal'))
+            
+            # 删除目标
+            db.session.delete(goal)
+            db.session.commit()
+            flash('储蓄目标删除成功！', 'success')
         return redirect(url_for('goal'))
     
     # 交易记录页面路由 - GET请求直接显示所有记录
