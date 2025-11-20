@@ -13,7 +13,46 @@ def register_routes(app, db):
     # 首页路由
     @app.route('/')
     def index():
-        return render_template('index.html')
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Income, Expense, Goal
+            
+            # 获取财务概览数据
+            # 查询所有收入和支出记录
+            incomes = Income.query.all()
+            expenses = Expense.query.all()
+            goals = Goal.query.all()
+            
+            # 计算总收入和总支出
+            total_income = sum(income.amount for income in incomes)
+            total_expense = sum(expense.amount for expense in expenses)
+            available_savings = total_income - total_expense
+            
+            # 转换目标为字典格式并计算进度
+            goals_data = []
+            for goal in goals:
+                # 计算每个目标的进度百分比
+                progress = 0
+                if goal.target_amount > 0:
+                    progress = max(0, min(100, (available_savings / goal.target_amount) * 100))
+                
+                goals_data.append({
+                    'id': goal.id,
+                    'name': goal.name,
+                    'target_amount': goal.target_amount,
+                    'current_amount': available_savings,
+                    'progress_percentage': progress
+                })
+            
+            # 准备图表数据
+            chart_data = {
+                'total_income': total_income,
+                'total_expense': total_expense,
+                'available_savings': available_savings,
+                'goals': goals_data
+            }
+            
+            return render_template('index.html', chart_data=chart_data)
     
     # 收入管理页面路由
     @app.route('/incomes')
@@ -40,7 +79,8 @@ def register_routes(app, db):
                 return redirect(url_for('incomes'))
                 
             description = request.form.get('description', '')
-            new_income = Income(name=name, amount=amount, description=description)
+            category = request.form.get('category', '')
+            new_income = Income(name=name, amount=amount, description=description, category=category)
             db.session.add(new_income)
             db.session.commit()
             flash('收入添加成功！', 'success')
@@ -81,7 +121,137 @@ def register_routes(app, db):
     # 目标页面路由
     @app.route('/goal')
     def goal():
-        return render_template('goal.html')
+        with app.app_context():
+            from models import Goal, Income, Expense
+            # 查询所有目标
+            goals = Goal.query.all()
+            # 查询所有收入和支出记录以计算可用储蓄
+            incomes = Income.query.all()
+            expenses = Expense.query.all()
+            
+            # 计算总收入和总支出
+            total_income = sum(income.amount for income in incomes)
+            total_expense = sum(expense.amount for expense in expenses)
+            
+            # 计算可用储蓄金额（收入减去支出）
+            available_savings = total_income - total_expense
+            
+            # 转换目标为字典格式
+            goals_dict = [goal.to_dict() for goal in goals]
+            
+            # 计算每个目标的进度百分比，使用可用储蓄作为当前金额
+            for g in goals_dict:
+                # 使用实际储蓄金额作为当前进度
+                g['current_amount'] = available_savings
+                if g['target_amount'] > 0:
+                    # 计算进度百分比，但确保不小于0且不大于100
+                    progress = (available_savings / g['target_amount']) * 100
+                    g['progress_percentage'] = max(0, min(100, progress))
+                else:
+                    g['progress_percentage'] = 0
+                    
+            # 将总览信息也传递给模板
+            overview = {
+                'total_income': total_income,
+                'total_expense': total_expense,
+                'available_savings': available_savings
+            }
+            
+            return render_template('goal.html', goals=goals_dict, overview=overview)
+    
+    # 添加储蓄目标路由
+    @app.route('/add_goal', methods=['POST'])
+    def add_goal():
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            from datetime import datetime
+            
+            # 获取表单数据
+            name = request.form.get('name', '未命名目标')
+            
+            # 服务器端数据验证
+            try:
+                target_amount = float(request.form['target_amount'])
+                # 验证金额必须大于0
+                if target_amount <= 0:
+                    flash('错误：目标金额必须大于0！', 'error')
+                    return redirect(url_for('goal'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('goal'))
+            
+            description = request.form.get('description', '')
+            
+            # 创建新目标
+            new_goal = Goal(
+                name=name,
+                target_amount=target_amount,
+                current_amount=0.0,  # 初始金额为0
+                description=description
+            )
+            
+            db.session.add(new_goal)
+            db.session.commit()
+            flash('储蓄目标添加成功！', 'success')
+        return redirect(url_for('goal'))
+    
+    # 编辑储蓄目标路由
+    @app.route('/edit_goal/<int:goal_id>', methods=['POST'])
+    def edit_goal(goal_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            
+            # 通过主键查找目标
+            goal = Goal.query.get(goal_id)
+            if not goal:
+                flash('错误：未找到该目标！', 'error')
+                return redirect(url_for('goal'))
+            
+            # 获取表单数据并更新目标
+            name = request.form.get('name', '未命名目标')
+            
+            # 服务器端数据验证
+            try:
+                target_amount = float(request.form['target_amount'])
+                # 验证金额必须大于0
+                if target_amount <= 0:
+                    flash('错误：目标金额必须大于0！', 'error')
+                    return redirect(url_for('goal'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('goal'))
+            
+            description = request.form.get('description', '')
+            
+            # 更新目标信息
+            goal.name = name
+            goal.target_amount = target_amount
+            goal.description = description
+            
+            db.session.commit()
+            flash('储蓄目标更新成功！', 'success')
+        return redirect(url_for('goal'))
+    
+    # 删除储蓄目标路由
+    @app.route('/delete_goal/<int:goal_id>', methods=['POST'])
+    def delete_goal(goal_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            
+            # 通过主键查找目标
+            goal = Goal.query.get(goal_id)
+            if not goal:
+                flash('错误：未找到该目标！', 'error')
+                return redirect(url_for('goal'))
+            
+            # 删除目标
+            db.session.delete(goal)
+            db.session.commit()
+            flash('储蓄目标删除成功！', 'success')
+        return redirect(url_for('goal'))
     
     # 交易记录页面路由 - GET请求直接显示所有记录
     @app.route('/transaction')

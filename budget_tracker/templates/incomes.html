@@ -4,6 +4,7 @@
 {% block title %}收入{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/incomes.css') }}">
 <div class="page-header">
     <h2>收入管理</h2>
     <p>收入记录页面</p>
@@ -21,10 +22,43 @@
     {% endwith %}
     
     <form action="{{ url_for('add_income') }}" method="POST" onsubmit="return validateIncomeForm();">
-        <label for="name">收入名称:</label>
-        <input type="text" id="name" name="name" required>
+        <label for="name">收入名称:</label> (选填)
+        <input type="text" id="name" name="name">
         <br>
+        <label>收入类别:</label>
+        <div class="category-tags">
+            <label class="category-tag">
+                <input type="radio" name="category" value="">
+                <span>未选择</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="salary">
+                <span>工资</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="bonus">
+                <span>奖金</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="investment">
+                <span>投资收益</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="part_time">
+                <span>兼职收入</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="gift">
+                <span>礼金</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="other">
+                <span>其他</span>
+            </label>
+        </div>
         <label for="amount">金额:</label>
+        
+
         <!-- 添加min属性确保金额大于0，添加step="0.01"允许小数 -->
         <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
         <br>
@@ -34,25 +68,6 @@
         <button type="submit">添加收入</button>
     </form>
     
-    <script>
-        // 客户端表单验证
-        function validateIncomeForm() {
-            const amount = document.getElementById('amount').value;
-            
-            // 检查是否为有效数字
-            if (isNaN(amount) || amount === '') {
-                alert('请输入有效的金额数值！');
-                return false;
-            }
-            
-            // 检查金额是否大于0
-            if (parseFloat(amount) <= 0) {
-                alert('错误：收入金额必须大于0！');
-                return false;
-            }
-            
-            return true;
-        }
-    </script>
 </div>
+    <script src="{{ url_for('static', filename='js/incomes.js') }}"></script>
 {% endblock %}

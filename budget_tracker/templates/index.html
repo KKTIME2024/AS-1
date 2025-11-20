@@ -1,15 +1,64 @@
 <!-- @author:JK -->
- <!--index-->
+<!--index-->
 {% extends "base.html" %}
 
-{% block title %}首页{% endblock %}
+{% block title %}首页 - 财务概览{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <div class="page-header">
-    <h2>首页</h2>
-    <p>欢迎使用记账应用</p>
+    <h2>财务概览</h2>
+    <p>您的财务状况总览</p>
 </div>
 <div class="content">
-    <p>这是一个基础的记账应用框架。</p>
+    <!-- 财务概览卡片 -->
+    <div class="summary-cards">
+        <div class="summary-card income">
+            <h3>总收入</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.total_income) }}</p>
+        </div>
+        <div class="summary-card expense">
+            <h3>总支出</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.total_expense) }}</p>
+        </div>
+        <div class="summary-card savings {% if chart_data.available_savings >= 0 %}positive{% else %}negative{% endif %}">
+            <h3>可用储蓄</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.available_savings) }}</p>
+        </div>
+    </div>
+    
+    <!-- 图表区域 -->
+    <div class="charts-container">
+        <!-- 收入支出饼图 -->
+        <div class="chart-section">
+            <h3>收入支出分布</h3>
+            <div class="chart-wrapper">
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 储蓄目标进度 -->
+        <div class="chart-section">
+            <h3>储蓄目标进度</h3>
+            <div class="chart-wrapper">
+                {% if chart_data.goals %}
+                    <canvas id="goalsProgressChart"></canvas>
+                {% else %}
+                    <p class="no-data-message">暂无储蓄目标，请先设置目标</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- 引入Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 图表初始化脚本 -->
+<div id="chart-data" style="display: none;" 
+     data-total-income="{{ chart_data.total_income|default(0) }}"
+     data-total-expense="{{ chart_data.total_expense|default(0) }}"
+     data-goals='{{ chart_data.goals|default([])|tojson|safe }}'></div>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

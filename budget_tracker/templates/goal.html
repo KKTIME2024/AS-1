@@ -5,11 +5,108 @@
 {% block title %}目标{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/goal.css') }}">
 <div class="page-header">
     <h2>目标设置</h2>
     <p>财务目标页面</p>
 </div>
 <div class="content">
-    <p>目标功能待实现...</p>
+    <!-- 显示flash消息 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="goals-list">
+        <h3>当前目标</h3>
+        {% if goals %}
+            {% for goal in goals %}
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <h4>{{ goal.name }}</h4>
+                        <div class="goal-actions">
+                            <button class="edit-btn" data-goal-id="{{ goal.id }}" data-goal-name="{{ goal.name }}" data-goal-amount="{{ goal.target_amount }}" data-goal-desc="{{ goal.description }}">编辑</button>
+                            <form action="{{ url_for('delete_goal', goal_id=goal.id) }}" method="POST" onsubmit="return confirm('确定要删除这个目标吗？');">
+                                <button type="submit" class="delete-btn">删除</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="goal-date">创建于：{{ goal.created_at.split('T')[0] }}</div>
+                    <div class="goal-progress">
+                        <div class="progress-bar" style="--progress: {{ [goal.progress_percentage, 0]|max }}%">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            ¥{{ "%.2f"|format(goal.current_amount) }} / ¥{{ "%.2f"|format(goal.target_amount) }}
+                            ({{ "%.1f"|format([goal.progress_percentage, 0]|max) }}%)
+                        </div>
+                    </div>
+                    {% if goal.description %}
+                        <div class="goal-description">{{ goal.description }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-goals-message">您还没有设置任何储蓄目标，开始创建您的第一个目标吧！</p>
+        {% endif %}
+    </div>
+    
+    <!-- 添加目标表单 -->
+    <div class="add-goal-form">
+        <h3>添加新储蓄目标</h3>
+        <form action="{{ url_for('add_goal') }}" method="POST">
+            <div class="form-group">
+                <label for="name">目标名称（可选）</label>
+                <input type="text" id="name" name="name" placeholder="例如：购买新电脑">
+            </div>
+            <div class="form-group">
+                <label for="target_amount">目标金额 *</label>
+                <input type="number" id="target_amount" name="target_amount" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="description">描述（可选）</label>
+                <textarea id="description" name="description" rows="3" placeholder="添加关于这个目标的描述..."></textarea>
+            </div>
+            <button type="submit">添加目标</button>
+        </form>
+    </div>
+    
+    <!-- 编辑目标的模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑储蓄目标</h3>
+                <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editGoalForm" action="" method="POST">
+                <input type="hidden" id="editGoalId" name="goal_id">
+                <div class="form-group">
+                    <label for="editName">目标名称（可选）</label>
+                    <input type="text" id="editName" name="name" placeholder="例如：购买新电脑">
+                </div>
+                <div class="form-group">
+                    <label for="editTargetAmount">目标金额 *</label>
+                    <input type="number" id="editTargetAmount" name="target_amount" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">描述（可选）</label>
+                    <textarea id="editDescription" name="description" rows="3" placeholder="添加关于这个目标的描述..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeEditModal()" class="cancel-btn">取消</button>
+                    <button type="submit" class="save-btn">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+
+    
 </div>
+    <script src="{{ url_for('static', filename='js/goal.js') }}"></script>
 {% endblock %}
