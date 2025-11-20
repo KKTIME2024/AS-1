@@ -81,7 +81,56 @@ def register_routes(app, db):
     # 目标页面路由
     @app.route('/goal')
     def goal():
-        return render_template('goal.html')
+        with app.app_context():
+            from models import Goal
+            # 查询所有目标
+            goals = Goal.query.all()
+            # 转换目标为字典格式
+            goals_dict = [goal.to_dict() for goal in goals]
+            # 计算每个目标的进度百分比
+            for g in goals_dict:
+                if g['target_amount'] > 0:
+                    g['progress_percentage'] = min(100, (g['current_amount'] / g['target_amount']) * 100)
+                else:
+                    g['progress_percentage'] = 0
+            return render_template('goal.html', goals=goals_dict)
+    
+    # 添加储蓄目标路由
+    @app.route('/add_goal', methods=['POST'])
+    def add_goal():
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Goal
+            from datetime import datetime
+            
+            # 获取表单数据
+            name = request.form.get('name', '未命名目标')
+            
+            # 服务器端数据验证
+            try:
+                target_amount = float(request.form['target_amount'])
+                # 验证金额必须大于0
+                if target_amount <= 0:
+                    flash('错误：目标金额必须大于0！', 'error')
+                    return redirect(url_for('goal'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('goal'))
+            
+            description = request.form.get('description', '')
+            
+            # 创建新目标
+            new_goal = Goal(
+                name=name,
+                target_amount=target_amount,
+                current_amount=0.0,  # 初始金额为0
+                description=description
+            )
+            
+            db.session.add(new_goal)
+            db.session.commit()
+            flash('储蓄目标添加成功！', 'success')
+        return redirect(url_for('goal'))
     
     # 交易记录页面路由 - GET请求直接显示所有记录
     @app.route('/transaction')
