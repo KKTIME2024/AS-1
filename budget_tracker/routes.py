@@ -44,12 +44,45 @@ def register_routes(app, db):
                     'progress_percentage': progress
                 })
             
+            # 按标签分类统计收入
+            income_by_category = {}
+            for income in incomes:
+                category = income.category or '未分类'
+                if category not in income_by_category:
+                    income_by_category[category] = 0
+                income_by_category[category] += income.amount
+            
+            # 按标签分类统计支出
+            expense_by_category = {}
+            for expense in expenses:
+                category = expense.category or '未分类'
+                if category not in expense_by_category:
+                    expense_by_category[category] = 0
+                expense_by_category[category] += expense.amount
+            
+            # 转换为图表可用的数据格式
+            income_categories = []
+            income_amounts = []
+            for category, amount in income_by_category.items():
+                income_categories.append(category)
+                income_amounts.append(amount)
+            
+            expense_categories = []
+            expense_amounts = []
+            for category, amount in expense_by_category.items():
+                expense_categories.append(category)
+                expense_amounts.append(amount)
+            
             # 准备图表数据
             chart_data = {
                 'total_income': total_income,
                 'total_expense': total_expense,
                 'available_savings': available_savings,
-                'goals': goals_data
+                'goals': goals_data,
+                'income_categories': income_categories,
+                'income_amounts': income_amounts,
+                'expense_categories': expense_categories,
+                'expense_amounts': expense_amounts
             }
             
             return render_template('index.html', chart_data=chart_data)
@@ -267,3 +300,81 @@ def register_routes(app, db):
             expenditures_dict = [expenditure.to_dict() for expenditure in expenditures]
             # 渲染模板并传递数据
             return render_template('transaction.html', incomes=incomes_dict, expenditures=expenditures_dict)
+    
+    # 编辑收入记录路由
+    @app.route('/edit_income/<int:income_id>', methods=['POST'])
+    def edit_income(income_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Income
+            
+            # 通过主键查找收入记录
+            income = Income.query.get(income_id)
+            if not income:
+                flash('错误：未找到该收入记录！', 'error')
+                return redirect(url_for('transaction'))
+            
+            # 获取表单数据并更新收入记录
+            name = request.form['name']
+            
+            # 服务器端数据验证
+            try:
+                amount = float(request.form['amount'])
+                # 验证金额必须大于0
+                if amount <= 0:
+                    flash('错误：收入金额必须大于0！', 'error')
+                    return redirect(url_for('transaction'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('transaction'))
+            
+            description = request.form.get('description', '')
+            
+            # 更新收入记录信息
+            income.name = name
+            income.amount = amount
+            income.description = description
+            
+            db.session.commit()
+            flash('收入记录更新成功！', 'success')
+        return redirect(url_for('transaction'))
+    
+    # 编辑支出记录路由
+    @app.route('/edit_expenditure/<int:expenditure_id>', methods=['POST'])
+    def edit_expenditure(expenditure_id):
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Expense
+            
+            # 通过主键查找支出记录
+            expense = Expense.query.get(expenditure_id)
+            if not expense:
+                flash('错误：未找到该支出记录！', 'error')
+                return redirect(url_for('transaction'))
+            
+            # 获取表单数据并更新支出记录
+            name = request.form['name']
+            
+            # 服务器端数据验证
+            try:
+                amount = float(request.form['amount'])
+                # 验证金额必须大于0
+                if amount <= 0:
+                    flash('错误：支出金额必须大于0！', 'error')
+                    return redirect(url_for('transaction'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('transaction'))
+            
+            category = request.form.get('category', '')
+            description = request.form.get('description', '')
+            
+            # 更新支出记录信息
+            expense.name = name
+            expense.amount = amount
+            expense.category = category
+            expense.description = description
+            
+            db.session.commit()
+            flash('支出记录更新成功！', 'success')
+        return redirect(url_for('transaction'))

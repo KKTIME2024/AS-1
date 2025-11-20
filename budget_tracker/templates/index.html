@@ -29,9 +29,9 @@
     
     <!-- 图表区域 -->
     <div class="charts-container">
-        <!-- 收入支出饼图 -->
+        <!-- 收入支出条形图 -->
         <div class="chart-section">
-            <h3>收入支出分布</h3>
+            <h3>收入支出</h3>
             <div class="chart-wrapper">
                 <canvas id="incomeExpenseChart"></canvas>
             </div>
@@ -48,6 +48,30 @@
                 {% endif %}
             </div>
         </div>
+        
+        <!-- 收入按标签分类饼图 -->
+        <div class="chart-section">
+            <h3>收入按标签分类</h3>
+            <div class="chart-wrapper">
+                {% if chart_data.income_categories %}
+                    <canvas id="incomeByCategoryChart"></canvas>
+                {% else %}
+                    <p class="no-data-message">暂无收入数据</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 支出按标签分类饼图 -->
+        <div class="chart-section">
+            <h3>支出按标签分类</h3>
+            <div class="chart-wrapper">
+                {% if chart_data.expense_categories %}
+                    <canvas id="expenseByCategoryChart"></canvas>
+                {% else %}
+                    <p class="no-data-message">暂无支出数据</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 
@@ -58,7 +82,11 @@
 <div id="chart-data" style="display: none;" 
      data-total-income="{{ chart_data.total_income|default(0) }}"
      data-total-expense="{{ chart_data.total_expense|default(0) }}"
-     data-goals='{{ chart_data.goals|default([])|tojson|safe }}'></div>
+     data-goals='{{ chart_data.goals|default([])|tojson|safe }}'
+     data-income-categories='{{ chart_data.income_categories|default([])|tojson|safe }}'
+     data-income-amounts='{{ chart_data.income_amounts|default([])|tojson|safe }}'
+     data-expense-categories='{{ chart_data.expense_categories|default([])|tojson|safe }}'
+     data-expense-amounts='{{ chart_data.expense_amounts|default([])|tojson|safe }}'></div>
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

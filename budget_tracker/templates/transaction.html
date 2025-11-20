@@ -22,16 +22,26 @@
                      <th>金额</th>
                      <th>描述</th>
                      <th>日期</th>
+                     <th>操作</th>
                  </tr>
              </thead>
              <tbody>
                  {% for income in incomes %}
                  <tr>
-                     <td>{{ income.name }}</td>
-                     <td class="amount income-amount">+{{ income.amount }}</td>
-                     <td>{{ income.description if income.description else '-' }}</td>
-                     <td>{{ income.created_at.split('T')[0] }}</td>
-                 </tr>
+                         <td>{{ income.name }}</td>
+                         <td class="amount income-amount">+{{ income.amount }}</td>
+                         <td>{{ income.description if income.description else '-' }}</td>
+                         <td>{{ income.created_at.split('T')[0] }}</td>
+                         <td>
+                             <button class="edit-btn income-edit-btn" 
+                                     data-income-id="{{ income.id }}" 
+                                     data-income-name="{{ income.name }}" 
+                                     data-income-amount="{{ income.amount }}" 
+                                     data-income-description="{{ income.description }}">
+                                 编辑
+                             </button>
+                         </td>
+                     </tr>
                  {% endfor %}
              </tbody>
          </table>
@@ -52,17 +62,28 @@
                      <th>描述</th>
                      <th>分类</th>
                      <th>日期</th>
+                     <th>操作</th>
                  </tr>
              </thead>
              <tbody>
                  {% for expenditure in expenditures %}
                  <tr>
-                     <td>{{ expenditure.name }}</td>
-                     <td class="amount expenditure-amount">-{{ expenditure.amount }}</td>
-                     <td>{{ expenditure.description if expenditure.description else '-' }}</td>
-                     <td>{{ expenditure.category if expenditure.category else '-' }}</td>
-                     <td>{{ expenditure.created_at.split('T')[0] }}</td>
-                 </tr>
+                         <td>{{ expenditure.name }}</td>
+                         <td class="amount expenditure-amount">-{{ expenditure.amount }}</td>
+                         <td>{{ expenditure.description if expenditure.description else '-' }}</td>
+                         <td>{{ expenditure.category if expenditure.category else '-' }}</td>
+                         <td>{{ expenditure.created_at.split('T')[0] }}</td>
+                         <td>
+                             <button class="edit-btn expenditure-edit-btn" 
+                                     data-expenditure-id="{{ expenditure.id }}" 
+                                     data-expenditure-name="{{ expenditure.name }}" 
+                                     data-expenditure-amount="{{ expenditure.amount }}" 
+                                     data-expenditure-description="{{ expenditure.description }}" 
+                                     data-expenditure-category="{{ expenditure.category }}">
+                                 编辑
+                             </button>
+                         </td>
+                     </tr>
                  {% endfor %}
              </tbody>
          </table>
@@ -71,6 +92,68 @@
          {% endif %}
      </div>
  </div>
- 
- 
+     
+     <!-- 编辑收入的模态框 -->
+     <div id="editIncomeModal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>编辑收入记录</h3>
+                 <span class="close-btn" onclick="closeIncomeModal()">&times;</span>
+             </div>
+             <form id="editIncomeForm" action="" method="POST">
+                 <input type="hidden" id="editIncomeId" name="income_id">
+                 <div class="form-group">
+                     <label for="editIncomeName">收入名称 *</label>
+                     <input type="text" id="editIncomeName" name="name" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="editIncomeAmount">收入金额 *</label>
+                     <input type="number" id="editIncomeAmount" name="amount" step="0.01" min="0.01" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="editIncomeDescription">描述（可选）</label>
+                     <textarea id="editIncomeDescription" name="description" rows="3" placeholder="添加收入描述..."></textarea>
+                 </div>
+                 <div class="modal-actions">
+                     <button type="button" onclick="closeIncomeModal()" class="cancel-btn">取消</button>
+                     <button type="submit" class="save-btn">保存修改</button>
+                 </div>
+             </form>
+         </div>
+     </div>
+     
+     <!-- 编辑支出的模态框 -->
+     <div id="editExpenditureModal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>编辑支出记录</h3>
+                 <span class="close-btn" onclick="closeExpenditureModal()">&times;</span>
+             </div>
+             <form id="editExpenditureForm" action="" method="POST">
+                 <input type="hidden" id="editExpenditureId" name="expenditure_id">
+                 <div class="form-group">
+                     <label for="editExpenditureName">支出名称 *</label>
+                     <input type="text" id="editExpenditureName" name="name" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="editExpenditureAmount">支出金额 *</label>
+                     <input type="number" id="editExpenditureAmount" name="amount" step="0.01" min="0.01" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="editExpenditureCategory">分类（可选）</label>
+                     <input type="text" id="editExpenditureCategory" name="category" placeholder="例如：餐饮、交通">
+                 </div>
+                 <div class="form-group">
+                     <label for="editExpenditureDescription">描述（可选）</label>
+                     <textarea id="editExpenditureDescription" name="description" rows="3" placeholder="添加支出描述..."></textarea>
+                 </div>
+                 <div class="modal-actions">
+                     <button type="button" onclick="closeExpenditureModal()" class="cancel-btn">取消</button>
+                     <button type="submit" class="save-btn">保存修改</button>
+                 </div>
+             </form>
+         </div>
+     </div>
+     
+     <script src="{{ url_for('static', filename='js/transaction.js') }}"></script>
  {% endblock %}
