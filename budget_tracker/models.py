@@ -1,3 +1,4 @@
+# @author:JK
 from datetime import datetime
 
 # 使用延迟导入避免循环依赖问题
@@ -90,6 +91,11 @@ def setup_models(db_instance):
         created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
         
+        # 添加数据库级别的检查约束，确保金额大于0
+        __table_args__ = (
+            db_instance.CheckConstraint('amount > 0', name='check_income_amount_positive'),
+        )
+        
         def __repr__(self):
             return f'Income(name="{self.name}", amount={self.amount}, date={self.created_at.date()})'
         
@@ -111,6 +117,11 @@ def setup_models(db_instance):
         category = db_instance.Column(db_instance.String(50), nullable=True)
         created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
+        
+        # 添加数据库级别的检查约束，确保金额大于0
+        __table_args__ = (
+            db_instance.CheckConstraint('amount > 0', name='check_expense_amount_positive'),
+        )
         
         def __repr__(self):
             return f'Expense(name="{self.name}", amount={self.amount}, category={self.category}, date={self.created_at.date()})'

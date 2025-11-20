@@ -1,4 +1,4 @@
-<!--incomes-->
+<!-- @author:JK --><!--incomes-->
 {% extends "base.html" %}
 
 {% block title %}收入{% endblock %}
@@ -9,17 +9,50 @@
     <p>收入记录页面</p>
 </div>
 <div class="content">
-    <form action="{{ url_for('add_income') }}" method="POST">
+    <!-- 显示flash消息 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('add_income') }}" method="POST" onsubmit="return validateIncomeForm();">
         <label for="name">收入名称:</label>
         <input type="text" id="name" name="name" required>
         <br>
         <label for="amount">金额:</label>
-        <input type="number" id="amount" name="amount" step="0.01" required>
+        <!-- 添加min属性确保金额大于0，添加step="0.01"允许小数 -->
+        <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
         <br>
         <label for="description">描述:</label>
         <textarea id="description" name="description"></textarea>
         <br>
         <button type="submit">添加收入</button>
     </form>
+    
+    <script>
+        // 客户端表单验证
+        function validateIncomeForm() {
+            const amount = document.getElementById('amount').value;
+            
+            // 检查是否为有效数字
+            if (isNaN(amount) || amount === '') {
+                alert('请输入有效的金额数值！');
+                return false;
+            }
+            
+            // 检查金额是否大于0
+            if (parseFloat(amount) <= 0) {
+                alert('错误：收入金额必须大于0！');
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
 </div>
 {% endblock %}

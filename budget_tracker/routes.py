@@ -1,3 +1,4 @@
+# @author:JK
 from flask import render_template, redirect, url_for, request, flash
 import sys
 import os
@@ -26,11 +27,23 @@ def register_routes(app, db):
             # 在应用上下文中导入模型
             from models import Income
             name = request.form['name']
-            amount = float(request.form['amount'])
+            
+            # 服务器端数据验证
+            try:
+                amount = float(request.form['amount'])
+                # 验证金额必须大于0
+                if amount <= 0:
+                    flash('错误：收入金额必须大于0！', 'error')
+                    return redirect(url_for('incomes'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('incomes'))
+                
             description = request.form.get('description', '')
             new_income = Income(name=name, amount=amount, description=description)
             db.session.add(new_income)
             db.session.commit()
+            flash('收入添加成功！', 'success')
         return redirect(url_for('incomes'))
     
     # 支出管理页面路由
@@ -45,12 +58,24 @@ def register_routes(app, db):
             # 在应用上下文中导入模型
             from models import Expense
             name = request.form['name']
-            amount = float(request.form['amount'])
+            
+            # 服务器端数据验证
+            try:
+                amount = float(request.form['amount'])
+                # 验证金额必须大于0
+                if amount <= 0:
+                    flash('错误：支出金额必须大于0！', 'error')
+                    return redirect(url_for('expenditures'))
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('expenditures'))
+                
             description = request.form.get('description', '')
             category = request.form.get('category', '')
             new_expenditure = Expense(name=name, amount=amount, description=description, category=category)
             db.session.add(new_expenditure)
             db.session.commit()
+            flash('支出添加成功！', 'success')
         return redirect(url_for('expenditures'))
     
     # 目标页面路由
