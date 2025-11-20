@@ -13,7 +13,46 @@ def register_routes(app, db):
     # 首页路由
     @app.route('/')
     def index():
-        return render_template('index.html')
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Income, Expense, Goal
+            
+            # 获取财务概览数据
+            # 查询所有收入和支出记录
+            incomes = Income.query.all()
+            expenses = Expense.query.all()
+            goals = Goal.query.all()
+            
+            # 计算总收入和总支出
+            total_income = sum(income.amount for income in incomes)
+            total_expense = sum(expense.amount for expense in expenses)
+            available_savings = total_income - total_expense
+            
+            # 转换目标为字典格式并计算进度
+            goals_data = []
+            for goal in goals:
+                # 计算每个目标的进度百分比
+                progress = 0
+                if goal.target_amount > 0:
+                    progress = max(0, min(100, (available_savings / goal.target_amount) * 100))
+                
+                goals_data.append({
+                    'id': goal.id,
+                    'name': goal.name,
+                    'target_amount': goal.target_amount,
+                    'current_amount': available_savings,
+                    'progress_percentage': progress
+                })
+            
+            # 准备图表数据
+            chart_data = {
+                'total_income': total_income,
+                'total_expense': total_expense,
+                'available_savings': available_savings,
+                'goals': goals_data
+            }
+            
+            return render_template('index.html', chart_data=chart_data)
     
     # 收入管理页面路由
     @app.route('/incomes')

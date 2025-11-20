@@ -1,15 +1,258 @@
 <!-- @author:JK -->
- <!--index-->
+<!--index-->
 {% extends "base.html" %}
 
-{% block title %}首页{% endblock %}
+{% block title %}首页 - 财务概览{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>首页</h2>
-    <p>欢迎使用记账应用</p>
+    <h2>财务概览</h2>
+    <p>您的财务状况总览</p>
 </div>
 <div class="content">
-    <p>这是一个基础的记账应用框架。</p>
+    <!-- 财务概览卡片 -->
+    <div class="summary-cards">
+        <div class="summary-card income">
+            <h3>总收入</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.total_income) }}</p>
+        </div>
+        <div class="summary-card expense">
+            <h3>总支出</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.total_expense) }}</p>
+        </div>
+        <div class="summary-card savings {% if chart_data.available_savings >= 0 %}positive{% else %}negative{% endif %}">
+            <h3>可用储蓄</h3>
+            <p class="amount">¥{{ "%.2f"|format(chart_data.available_savings) }}</p>
+        </div>
+    </div>
+    
+    <!-- 图表区域 -->
+    <div class="charts-container">
+        <!-- 收入支出饼图 -->
+        <div class="chart-section">
+            <h3>收入支出分布</h3>
+            <div class="chart-wrapper">
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 储蓄目标进度 -->
+        <div class="chart-section">
+            <h3>储蓄目标进度</h3>
+            <div class="chart-wrapper">
+                {% if chart_data.goals %}
+                    <canvas id="goalsProgressChart"></canvas>
+                {% else %}
+                    <p class="no-data-message">暂无储蓄目标，请先设置目标</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- 引入Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 图表初始化脚本 -->
+<script>
+    // 页面加载完成后初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+        // 收入支出饼图数据
+        const totalIncome = {{ chart_data.total_income|tojson }};
+        const totalExpense = {{ chart_data.total_expense|tojson }};
+        
+        // 初始化收入支出饼图
+        if (totalIncome > 0 || totalExpense > 0) {
+            const pieCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['收入', '支出'],
+                    datasets: [{
+                        data: [totalIncome, totalExpense],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '¥' + context.raw.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 初始化储蓄目标进度条形图
+        const goalsData = {{ chart_data.goals|tojson }};
+        if (goalsData && goalsData.length > 0) {
+            const barCtx = document.getElementById('goalsProgressChart').getContext('2d');
+            
+            // 准备数据
+            const goalNames = goalsData.map(goal => goal.name.length > 15 ? goal.name.substring(0, 15) + '...' : goal.name);
+            const progressValues = goalsData.map(goal => goal.progress_percentage);
+            
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: goalNames,
+                    datasets: [{
+                        label: '完成进度 (%)',
+                        data: progressValues,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '完成百分比 (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const goal = goalsData[context.dataIndex];
+                                    return [
+                                        '完成进度: ' + context.raw.toFixed(1) + '%',
+                                        '当前储蓄: ¥' + goal.current_amount.toFixed(2),
+                                        '目标金额: ¥' + goal.target_amount.toFixed(2)
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* 概览卡片样式 */
+    .summary-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .summary-card {
+        flex: 1;
+        min-width: 200px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary-card.income {
+        background-color: #e3f2fd;
+        border-left: 5px solid #4fc3f7;
+    }
+    
+    .summary-card.expense {
+        background-color: #ffebee;
+        border-left: 5px solid #ef5350;
+    }
+    
+    .summary-card.savings.positive {
+        background-color: #e8f5e9;
+        border-left: 5px solid #66bb6a;
+    }
+    
+    .summary-card.savings.negative {
+        background-color: #fff8e1;
+        border-left: 5px solid #ffb74d;
+    }
+    
+    .summary-card h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+    }
+    
+    .summary-card .amount {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    /* 图表区域样式 */
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    .chart-section {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chart-section h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 20px;
+        color: #333;
+    }
+    
+    .chart-wrapper {
+        height: 300px;
+        position: relative;
+    }
+    
+    .no-data-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #999;
+        font-style: italic;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-cards {
+            flex-direction: column;
+        }
+    }
+</style>
 {% endblock %}
