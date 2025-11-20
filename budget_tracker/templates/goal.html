@@ -21,27 +21,6 @@
         {% endif %}
     {% endwith %}
     
-    <!-- 添加目标表单 -->
-    <div class="add-goal-form">
-        <h3>添加新储蓄目标</h3>
-        <form action="{{ url_for('add_goal') }}" method="POST">
-            <div class="form-group">
-                <label for="name">目标名称（可选）</label>
-                <input type="text" id="name" name="name" placeholder="例如：购买新电脑">
-            </div>
-            <div class="form-group">
-                <label for="target_amount">目标金额 *</label>
-                <input type="number" id="target_amount" name="target_amount" step="0.01" min="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="description">描述（可选）</label>
-                <textarea id="description" name="description" rows="3" placeholder="添加关于这个目标的描述..."></textarea>
-            </div>
-            <button type="submit">添加目标</button>
-        </form>
-    </div>
-    
-    <!-- 显示目标列表 -->
     <div class="goals-list">
         <h3>当前目标</h3>
         {% if goals %}
@@ -69,5 +48,28 @@
             <p class="no-goals-message">您还没有设置任何储蓄目标，开始创建您的第一个目标吧！</p>
         {% endif %}
     </div>
+    
+    <!-- 添加目标表单 -->
+    <div class="add-goal-form">
+        <h3>添加新储蓄目标</h3>
+        <form action="{{ url_for('add_goal') }}" method="POST">
+            <div class="form-group">
+                <label for="name">目标名称（可选）</label>
+                <input type="text" id="name" name="name" placeholder="例如：购买新电脑">
+            </div>
+            <div class="form-group">
+                <label for="target_amount">目标金额 *</label>
+                <input type="number" id="target_amount" name="target_amount" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="description">描述（可选）</label>
+                <textarea id="description" name="description" rows="3" placeholder="添加关于这个目标的描述..."></textarea>
+            </div>
+            <button type="submit">添加目标</button>
+        </form>
+    </div>
+    
+    <!-- 显示目标列表 -->
+    
 </div>
 {% endblock %}

@@ -82,18 +82,40 @@ def register_routes(app, db):
     @app.route('/goal')
     def goal():
         with app.app_context():
-            from models import Goal
+            from models import Goal, Income, Expense
             # 查询所有目标
             goals = Goal.query.all()
+            # 查询所有收入和支出记录以计算可用储蓄
+            incomes = Income.query.all()
+            expenses = Expense.query.all()
+            
+            # 计算总收入和总支出
+            total_income = sum(income.amount for income in incomes)
+            total_expense = sum(expense.amount for expense in expenses)
+            
+            # 计算可用储蓄金额（收入减去支出）
+            available_savings = total_income - total_expense
+            
             # 转换目标为字典格式
             goals_dict = [goal.to_dict() for goal in goals]
-            # 计算每个目标的进度百分比
+            
+            # 计算每个目标的进度百分比，使用可用储蓄作为当前金额
             for g in goals_dict:
+                # 使用实际储蓄金额作为当前进度
+                g['current_amount'] = available_savings
                 if g['target_amount'] > 0:
-                    g['progress_percentage'] = min(100, (g['current_amount'] / g['target_amount']) * 100)
+                    g['progress_percentage'] = min(100, (available_savings / g['target_amount']) * 100)
                 else:
                     g['progress_percentage'] = 0
-            return render_template('goal.html', goals=goals_dict)
+                    
+            # 将总览信息也传递给模板
+            overview = {
+                'total_income': total_income,
+                'total_expense': total_expense,
+                'available_savings': available_savings
+            }
+            
+            return render_template('goal.html', goals=goals_dict, overview=overview)
     
     # 添加储蓄目标路由
     @app.route('/add_goal', methods=['POST'])
