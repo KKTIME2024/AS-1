@@ -21,10 +21,86 @@
     {% endwith %}
     
     <form action="{{ url_for('add_income') }}" method="POST" onsubmit="return validateIncomeForm();">
-        <label for="name">收入名称:</label>
-        <input type="text" id="name" name="name" required>
+        <label for="name">收入名称:</label> (选填)
+        <input type="text" id="name" name="name">
         <br>
+        <label>收入类别:</label>
+        <div class="category-tags">
+            <label class="category-tag">
+                <input type="radio" name="category" value="">
+                <span>未选择</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="salary">
+                <span>工资</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="bonus">
+                <span>奖金</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="investment">
+                <span>投资收益</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="part_time">
+                <span>兼职收入</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="gift">
+                <span>礼金</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="other">
+                <span>其他</span>
+            </label>
+        </div>
         <label for="amount">金额:</label>
+        
+        <style>
+            .category-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .category-tag {
+                position: relative;
+                cursor: pointer;
+                margin: 0;
+            }
+            
+            .category-tag input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+            }
+            
+            .category-tag span {
+                display: inline-block;
+                padding: 6px 12px;
+                background-color: #f0f0f0;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                transition: all 0.2s ease;
+                user-select: none;
+            }
+            
+            .category-tag input[type="radio"]:checked + span {
+                background-color: #28a745;
+                color: white;
+                border-color: #28a745;
+            }
+            
+            .category-tag:hover span {
+                background-color: #e0e0e0;
+            }
+            
+            .category-tag input[type="radio"]:checked:hover + span {
+                background-color: #218838;
+            }
+        </style>
         <!-- 添加min属性确保金额大于0，添加step="0.01"允许小数 -->
         <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
         <br>

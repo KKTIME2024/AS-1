@@ -29,7 +29,7 @@
                     <div class="goal-header">
                         <h4>{{ goal.name }}</h4>
                         <div class="goal-actions">
-                            <button class="edit-btn" onclick="openEditModal({{ goal.id }}, '{{ goal.name }}', {{ goal.target_amount }}, '{{ goal.description|escape }}')">编辑</button>
+                            <button class="edit-btn" data-goal-id="{{ goal.id }}" data-goal-name="{{ goal.name }}" data-goal-amount="{{ goal.target_amount }}" data-goal-desc="{{ goal.description }}">编辑</button>
                             <form action="{{ url_for('delete_goal', goal_id=goal.id) }}" method="POST" onsubmit="return confirm('确定要删除这个目标吗？');">
                                 <button type="submit" class="delete-btn">删除</button>
                             </form>
@@ -39,7 +39,7 @@
                     <div class="goal-progress">
                         <div class="progress-bar" style="--progress: {{ [goal.progress_percentage, 0]|max }}%">
                             <div class="progress-fill"></div>
-                          </div>
+                        </div>
                         <div class="progress-text">
                             ¥{{ "%.2f"|format(goal.current_amount) }} / ¥{{ "%.2f"|format(goal.target_amount) }}
                             ({{ "%.1f"|format([goal.progress_percentage, 0]|max) }}%)
@@ -119,6 +119,20 @@
             // 显示模态框
             document.getElementById('editModal').style.display = 'block';
         }
+        
+        // 为所有编辑按钮添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButtons = document.querySelectorAll('.edit-btn');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-goal-id');
+                    const name = this.getAttribute('data-goal-name');
+                    const targetAmount = this.getAttribute('data-goal-amount');
+                    const description = this.getAttribute('data-goal-desc');
+                    openEditModal(id, name, targetAmount, description);
+                });
+            });
+        });
         
         // 关闭编辑模态框
         function closeEditModal() {

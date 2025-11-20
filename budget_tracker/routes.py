@@ -79,7 +79,8 @@ def register_routes(app, db):
                 return redirect(url_for('incomes'))
                 
             description = request.form.get('description', '')
-            new_income = Income(name=name, amount=amount, description=description)
+            category = request.form.get('category', '')
+            new_income = Income(name=name, amount=amount, description=description, category=category)
             db.session.add(new_income)
             db.session.commit()
             flash('收入添加成功！', 'success')

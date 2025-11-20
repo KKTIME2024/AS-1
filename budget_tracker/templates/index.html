@@ -54,12 +54,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- 图表初始化脚本 -->
+<div id="chart-data" style="display: none;" 
+     data-total-income="{{ chart_data.total_income|default(0) }}"
+     data-total-expense="{{ chart_data.total_expense|default(0) }}"
+     data-goals='{{ chart_data.goals|default([])|tojson|safe }}'></div>
+
 <script>
     // 页面加载完成后初始化图表
     document.addEventListener('DOMContentLoaded', function() {
-        // 收入支出饼图数据
-        const totalIncome = {{ chart_data.total_income|tojson }};
-        const totalExpense = {{ chart_data.total_expense|tojson }};
+        // 从数据属性获取图表数据
+        const chartDataElement = document.getElementById('chart-data');
+        const totalIncome = parseFloat(chartDataElement.getAttribute('data-total-income'));
+        const totalExpense = parseFloat(chartDataElement.getAttribute('data-total-expense'));
         
         // 初始化收入支出饼图
         if (totalIncome > 0 || totalExpense > 0) {
@@ -106,7 +112,7 @@
         }
         
         // 初始化储蓄目标进度条形图
-        const goalsData = {{ chart_data.goals|tojson }};
+        const goalsData = JSON.parse(chartDataElement.getAttribute('data-goals'));  // 使用后端传来的储蓄目标数据
         if (goalsData && goalsData.length > 0) {
             const barCtx = document.getElementById('goalsProgressChart').getContext('2d');
             
@@ -157,8 +163,9 @@
             });
         }
     });
-</script>
 
+
+</script>
 <style>
     /* 概览卡片样式 */
     .summary-cards {

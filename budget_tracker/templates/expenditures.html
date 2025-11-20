@@ -4,6 +4,7 @@
 {% block title %}支出{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/expenditure.css') }}">
 <div class="page-header">
     <h2>支出管理</h2>
     <p>支出记录页面</p>
@@ -21,24 +22,50 @@
     {% endwith %}
     
     <form action="{{ url_for('add_expenditure') }}" method="POST" onsubmit="return validateExpenseForm();">
-        <label for="name">支出名称:</label>
-        <input type="text" id="name" name="name" required>
+        <label for="name">支出名称:</label> (选填)
+        <input type="text" id="name" name="name">
         <br>
         <label for="amount">金额:</label>
         <!-- 添加min属性确保金额大于0，添加step="0.01"允许小数 -->
         <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
         <br>
-        <label for="category">支出类别:</label>
-        <select id="category" name="category">
-            <option value="">请选择支出类别</option>
-            <option value="food">食品</option>
-            <option value="transport">交通</option>
-            <option value="entertainment">娱乐</option>
-            <option value="medical">医疗</option>
-            <option value="education">教育</option>
-            <option value="shopping">购物</option>
-            <option value="other">其他</option>
-        </select>
+        <label>支出类别:</label>
+        <div class="category-tags">
+            <label class="category-tag">
+                <input type="radio" name="category" value="">
+                <span>未选择</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="food">
+                <span>食品</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="transport">
+                <span>交通</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="entertainment">
+                <span>娱乐</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="medical">
+                <span>医疗</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="education">
+                <span>教育</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="shopping">
+                <span>购物</span>
+            </label>
+            <label class="category-tag">
+                <input type="radio" name="category" value="other">
+                <span>其他</span>
+            </label>
+        </div>
+        
+
         <br>
         <label for="description">描述:</label>
         <textarea id="description" name="description"></textarea>
@@ -46,25 +73,7 @@
         <button type="submit">添加支出</button>
     </form>
     
-    <script>
-        // 客户端表单验证
-        function validateExpenseForm() {
-            const amount = document.getElementById('amount').value;
-            
-            // 检查是否为有效数字
-            if (isNaN(amount) || amount === '') {
-                alert('请输入有效的金额数值！');
-                return false;
-            }
-            
-            // 检查金额是否大于0
-            if (parseFloat(amount) <= 0) {
-                alert('错误：支出金额必须大于0！');
-                return false;
-            }
-            
-            return true;
-        }
-    </script>
+
 </div>
+    <script src="{{ url_for('static', filename='js/expenditures.js') }}"></script>
 {% endblock %}

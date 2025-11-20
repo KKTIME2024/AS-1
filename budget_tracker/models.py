@@ -90,6 +90,7 @@ def setup_models(db_instance):
         amount = db_instance.Column(db_instance.Float, nullable=False)
         created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
+        category = db_instance.Column(db_instance.String(50), nullable=True)
         
         # 添加数据库级别的检查约束，确保金额大于0
         __table_args__ = (
@@ -106,7 +107,8 @@ def setup_models(db_instance):
                 'name': self.name,
                 'amount': self.amount,
                 'created_at': self.created_at.isoformat() if self.created_at else None,
-                'description': self.description
+                'description': self.description,
+                'category': self.category
             }
     
     class Expense(db_instance.Model):
