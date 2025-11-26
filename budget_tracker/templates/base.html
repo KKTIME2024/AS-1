@@ -5,29 +5,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="个人财务管理和记账应用">
+    <meta name="keywords" content="记账,财务管理,预算,收入,支出">
+    <meta name="author" content="记账应用团队">
+    <!-- 可访问性增强 -->
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
     <title>记账应用 - {% block title %}首页{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility.css') }}">
 </head>
 <body>
-    <nav class="navbar">
+    <!-- 跳过导航链接，提升可访问性 -->
+    <a href="#main-content" class="skip-link" tabindex="0">跳过导航，直接访问主要内容</a>
+    
+    <nav class="navbar" role="navigation" aria-label="主导航">
         <div class="nav-container">
-            <h1 class="nav-logo">记账应用</h1>
-            <ul class="nav-menu">
-                <li><a href="{{ url_for('index') }}">首页</a></li>
-                <li><a href="{{ url_for('incomes') }}">收入</a></li>
-                <li><a href="{{ url_for('expenditures') }}">支出</a></li>
-                <li><a href="{{ url_for('transaction') }}">交易记录</a></li>
-                <li><a href="{{ url_for('goal') }}">目标</a></li>
+            <h1 class="nav-logo">
+                <a href="{{ url_for('index') }}" aria-label="首页">记账应用</a>
+            </h1>
+            
+            <!-- 移动端菜单按钮 -->
+            <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu" aria-label="打开导航菜单">
+                <span class="nav-toggle-icon"></span>
+                <span class="sr-only">菜单</span>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="{{ url_for('index') }}" aria-current="page" class="{% if request.endpoint == 'index' %}active{% endif %}">首页</a></li>
+                <li><a href="{{ url_for('incomes') }}" class="{% if request.endpoint == 'incomes' %}active{% endif %}">收入</a></li>
+                <li><a href="{{ url_for('expenditures') }}" class="{% if request.endpoint == 'expenditures' %}active{% endif %}">支出</a></li>
+                <li><a href="{{ url_for('transaction') }}" class="{% if request.endpoint == 'transaction' %}active{% endif %}">交易记录</a></li>
+                <li><a href="{{ url_for('goal') }}" class="{% if request.endpoint == 'goal' %}active{% endif %}">目标</a></li>
             </ul>
         </div>
     </nav>
 
-    <main class="main-content">
+    <main class="main-content" id="main-content" role="main">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2024 记账应用</p>
+    <footer class="footer" role="contentinfo">
+        <div class="footer-container">
+            <p>&copy; 2024 记账应用</p>
+            <div class="footer-links">
+                <a href="#" aria-label="隐私政策">隐私政策</a>
+                <a href="#" aria-label="使用条款">使用条款</a>
+                <a href="#" aria-label="联系我们">联系我们</a>
+            </div>
+        </div>
     </footer>
+    
+    <!-- 引入导航脚本 -->
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
 </body>
 </html>

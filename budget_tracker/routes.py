@@ -98,25 +98,57 @@ def register_routes(app, db):
         with app.app_context():
             # 在应用上下文中导入模型
             from models import Income
-            name = request.form['name']
+            
+            # 获取并验证请求数据
+            name = request.form.get('name', '').strip()
+            if name and len(name) > 100:
+                flash('错误：收入名称不能超过100个字符！', 'error')
+                return redirect(url_for('incomes'))
             
             # 服务器端数据验证
             try:
                 amount = float(request.form['amount'])
-                # 验证金额必须大于0
-                if amount <= 0:
-                    flash('错误：收入金额必须大于0！', 'error')
+                # 验证金额必须大于0且小于1,000,000
+                if amount <= 0 or amount > 1000000:
+                    flash('错误：收入金额必须大于0且小于1,000,000！', 'error')
                     return redirect(url_for('incomes'))
+                # 限制小数位数为2位
+                amount = round(amount, 2)
             except ValueError:
                 flash('错误：请输入有效的金额数值！', 'error')
                 return redirect(url_for('incomes'))
                 
-            description = request.form.get('description', '')
-            category = request.form.get('category', '')
-            new_income = Income(name=name, amount=amount, description=description, category=category)
-            db.session.add(new_income)
-            db.session.commit()
-            flash('收入添加成功！', 'success')
+            # 验证类别
+            valid_categories = ['salary', 'bonus', 'investment', 'part_time', 'gift', 'other']
+            category = request.form.get('category', '').strip()
+            if category and category not in valid_categories:
+                flash('错误：请选择有效的收入类别！', 'error')
+                return redirect(url_for('incomes'))
+            
+            description = request.form.get('description', '').strip()
+            if len(description) > 500:
+                flash('错误：描述不能超过500个字符！', 'error')
+                return redirect(url_for('incomes'))
+                
+            # 添加到数据库
+            try:
+                # 类别映射：将英文值映射为中文显示名称
+                category_map = {
+                    'salary': '工资',
+                    'bonus': '奖金',
+                    'investment': '投资收益',
+                    'part_time': '兼职收入',
+                    'gift': '礼金',
+                    'other': '其他'
+                }
+                display_category = category_map.get(category, '')
+                new_income = Income(name=name, amount=amount, description=description, category=display_category)
+                db.session.add(new_income)
+                db.session.commit()
+                flash('收入添加成功！', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash('错误：服务器错误，添加收入失败！', 'error')
         return redirect(url_for('incomes'))
     
     # 支出管理页面路由
@@ -130,25 +162,104 @@ def register_routes(app, db):
         with app.app_context():
             # 在应用上下文中导入模型
             from models import Expense
-            name = request.form['name']
+            
+            # 获取并验证请求数据
+            name = request.form.get('name', '').strip()
+            if name and len(name) > 100:
+                flash('错误：支出名称不能超过100个字符！', 'error')
+                return redirect(url_for('expenditures'))
             
             # 服务器端数据验证
             try:
                 amount = float(request.form['amount'])
-                # 验证金额必须大于0
-                if amount <= 0:
-                    flash('错误：支出金额必须大于0！', 'error')
+                # 验证金额必须大于0且小于1,000,000
+                if amount <= 0 or amount > 1000000:
+                    flash('错误：支出金额必须大于0且小于1,000,000！', 'error')
                     return redirect(url_for('expenditures'))
+                # 限制小数位数为2位
+                amount = round(amount, 2)
             except ValueError:
                 flash('错误：请输入有效的金额数值！', 'error')
                 return redirect(url_for('expenditures'))
                 
-            description = request.form.get('description', '')
-            category = request.form.get('category', '')
-            new_expenditure = Expense(name=name, amount=amount, description=description, category=category)
-            db.session.add(new_expenditure)
-            db.session.commit()
-            flash('支出添加成功！', 'success')
+            # 验证类别
+            valid_categories = ['food', 'transport', 'entertainment', 'medical', 'education', 'shopping', 'other']
+            category = request.form.get('category', '').strip()
+            if category and category not in valid_categories:
+                flash('错误：请选择有效的支出类别！', 'error')
+                return redirect(url_for('expenditures'))
+            
+            description = request.form.get('description', '').strip()
+            if len(description) > 500:
+                flash('错误：描述不能超过500个字符！', 'error')
+                return redirect(url_for('expenditures'))
+                
+            # 添加到数据库
+            try:
+                # 类别映射：将英文值映射为中文显示名称
+                category_map = {
+                    'food': '食品',
+                    'transport': '交通',
+                    'entertainment': '娱乐',
+                    'medical': '医疗',
+                    'education': '教育',
+                    'shopping': '购物',
+                    'other': '其他'
+                }
+                display_category = category_map.get(category, '')
+                new_expense = Expense(name=name, amount=amount, description=description, category=display_category)
+                db.session.add(new_expense)
+                db.session.commit()
+                flash('支出添加成功！', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash('错误：服务器错误，添加支出失败！', 'error')
+        return redirect(url_for('expenditures'))
+    def add_expenditure():
+        with app.app_context():
+            # 在应用上下文中导入模型
+            from models import Expense
+            
+            # 获取并验证请求数据
+            name = request.form.get('name', '').strip()
+            if name and len(name) > 100:
+                flash('错误：支出名称不能超过100个字符！', 'error')
+                return redirect(url_for('expenditures'))
+            
+            # 服务器端数据验证
+            try:
+                amount = float(request.form['amount'])
+                # 验证金额必须大于0且小于1,000,000
+                if amount <= 0 or amount > 1000000:
+                    flash('错误：支出金额必须大于0且小于1,000,000！', 'error')
+                    return redirect(url_for('expenditures'))
+                # 限制小数位数为2位
+                amount = round(amount, 2)
+            except ValueError:
+                flash('错误：请输入有效的金额数值！', 'error')
+                return redirect(url_for('expenditures'))
+                
+            # 验证类别
+            valid_categories = ['食品', '交通', '住房', '娱乐', '医疗', '教育', '其他']
+            category = request.form.get('category', '').strip()
+            if category and category not in valid_categories:
+                flash('错误：请选择有效的支出类别！', 'error')
+                return redirect(url_for('expenditures'))
+            
+            description = request.form.get('description', '').strip()
+            if len(description) > 500:
+                flash('错误：描述不能超过500个字符！', 'error')
+                return redirect(url_for('expenditures'))
+                
+            # 添加到数据库
+            try:
+                new_expenditure = Expense(name=name, amount=amount, description=description, category=category)
+                db.session.add(new_expenditure)
+                db.session.commit()
+                flash('支出添加成功！', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash('错误：服务器错误，添加支出失败！', 'error')
         return redirect(url_for('expenditures'))
     
     # 目标页面路由
