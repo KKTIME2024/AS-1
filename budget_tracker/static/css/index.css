@@ -45,6 +45,11 @@
     font-size: 28px;
     font-weight: bold;
     margin: 0;
+    aria-role: "status";
+    aria-live: "polite";
+    display: block;
+    /* 确保不会被错误识别为标题 */
+    line-height: 1.2;
 }
 
 /* 图表区域样式 */
@@ -78,8 +83,9 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #999;
+    color: var(--text-light-message);
     font-style: italic;
+    font-weight: 500;
 }
 
 /* 响应式设计 */

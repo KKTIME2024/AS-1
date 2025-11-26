@@ -215,7 +215,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 确保链接在文本中足够明显 */
 a:not(.nav-link) {
-    color: #1d4ed8;
+    color: #ffffff;
     text-decoration: underline;
     text-underline-offset: 4px;
 }

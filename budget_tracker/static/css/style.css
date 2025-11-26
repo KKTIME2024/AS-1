@@ -24,6 +24,11 @@
     --border-radius: 4px;
     --transition: all 0.3s ease;
     --max-width: 1200px;
+    /* 符合WCAG AA标准的颜色变量 */
+    --link-light: #2563eb;
+    --link-dark: #93c5fd;
+    --text-light-contrast: #000612;
+    --text-light-message: #666666;
 }
 
 /* 可访问性跳过链接 */
@@ -43,6 +48,29 @@
     top: 0;
     outline: 2px solid white;
     outline-offset: 2px;
+}
+
+/* 导航栏和页脚链接样式 - 符合WCAG AA对比度要求 */
+.nav-logo a,
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-logo a:hover,
+.nav-logo a:focus,
+.footer-links a:hover,
+.footer-links a:focus {
+    color: white;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+/* 页面描述文本样式 - 符合WCAG AA对比度要求 */
+.page-header p {
+    color: #595959;
+    font-weight: 500;
 }
 
 /* 目标页面样式 */
@@ -199,6 +227,30 @@
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
+/* 页面描述文本样式 - 符合WCAG AA对比度要求 */
+.page-header p {
+    color: var(--text-light-contrast);
+    font-weight: 500;
+}
+
+/* 无数据消息样式 - 符合WCAG AA对比度要求 */
+.no-data-message {
+    color: var(--text-light-message);
+    font-weight: 500;
+}
+
+/* 页面描述文本样式 - 符合WCAG AA对比度要求 */
+.page-header p {
+    color: var(--text-light-contrast);
+    font-weight: 500;
+}
+
+/* 无数据消息样式 - 符合WCAG AA对比度要求 */
+.no-data-message {
+    color: var(--text-light-message);
+    font-weight: 500;
+}
+
 /* 错误状态样式 */
 .form-error {
     color: var(--danger-color);
@@ -263,7 +315,7 @@ select:invalid {
 }
 
 .page-header p {
-    color: var(--text-light);
+    color: var(--text-light-contrast);
 }
 
 body {
@@ -354,7 +406,11 @@ nav {
 
 .nav-menu a.active {
     background-color: var(--secondary-color);
-    font-weight: 600;
+    color: white;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.5);
+    outline: none;
+    position: relative;
 }
 
 /* 移动端导航切换按钮 */
