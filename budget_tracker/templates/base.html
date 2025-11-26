@@ -22,7 +22,7 @@
     <nav class="navbar" role="navigation" aria-label="主导航">
         <div class="nav-container">
             <h1 class="nav-logo">
-                <a href="{{ url_for('index') }}" aria-label="首页">记账应用</a>
+                <a href="{{ url_for('index') }}" aria-current="{% if request.endpoint == 'index' %}page{% else %}false{% endif %}" class="{% if request.endpoint == 'index' %}active{% endif %}" aria-label="首页">记账应用</a>
             </h1>
             
             <!-- 移动端菜单按钮 -->
@@ -32,7 +32,6 @@
             </button>
             
             <ul class="nav-menu" id="navMenu">
-                <li><a href="{{ url_for('index') }}" aria-current="page" class="{% if request.endpoint == 'index' %}active{% endif %}">首页</a></li>
                 <li><a href="{{ url_for('incomes') }}" class="{% if request.endpoint == 'incomes' %}active{% endif %}">收入</a></li>
                 <li><a href="{{ url_for('expenditures') }}" class="{% if request.endpoint == 'expenditures' %}active{% endif %}">支出</a></li>
                 <li><a href="{{ url_for('transaction') }}" class="{% if request.endpoint == 'transaction' %}active{% endif %}">交易记录</a></li>
