@@ -5,6 +5,8 @@ from datetime import datetime
 # 这个模块将在应用上下文中被导入，此时db实例已经被正确初始化
 
 # 定义模型但不立即使用db，因为db将在应用上下文中提供
+
+
 class Income:
     """收入数据模型 - 移除了名称唯一性约束"""
     # 注意：这些定义只是类型提示，实际的db.Column将在运行时由SQLAlchemy处理
@@ -13,10 +15,10 @@ class Income:
     amount = None
     created_at = None
     description = None
-    
+
     def __repr__(self):
         return f'Income(name="{self.name}", amount={self.amount}, date={self.created_at.date()})'
-    
+
     def to_dict(self):
         """将模型转换为字典格式"""
         return {
@@ -27,6 +29,7 @@ class Income:
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
+
 class Expense:
     """支出数据模型"""
     # 注意：这些定义只是类型提示，实际的db.Column将在运行时由SQLAlchemy处理
@@ -36,10 +39,10 @@ class Expense:
     category = None
     created_at = None
     description = None
-    
+
     def __repr__(self):
         return f'Expense(name="{self.name}", amount={self.amount}, category={self.category}, date={self.created_at.date()})'
-    
+
     def to_dict(self):
         """将模型转换为字典格式"""
         return {
@@ -51,6 +54,7 @@ class Expense:
             'description': self.description
         }
 
+
 class Goal:
     """财务目标数据模型"""
     # 注意：这些定义只是类型提示，实际的db.Column将在运行时由SQLAlchemy处理
@@ -61,10 +65,10 @@ class Goal:
     deadline = None
     created_at = None
     description = None
-    
+
     def __repr__(self):
         return f'Goal(name="{self.name}", target={self.target_amount}, current={self.current_amount})'
-    
+
     def to_dict(self):
         """将模型转换为字典格式"""
         return {
@@ -78,28 +82,32 @@ class Goal:
         }
 
 # 这个函数会在应用初始化时调用，用于正确设置模型与db的关系
+
+
 def setup_models(db_instance):
     """设置模型与数据库实例的关系"""
     global Income, Expense, Goal
-    
+
     # 重新定义模型，使用传入的db实例
     class Income(db_instance.Model):
         """收入数据模型 - 移除了名称唯一性约束"""
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         name = db_instance.Column(db_instance.String(100), nullable=False)
         amount = db_instance.Column(db_instance.Float, nullable=False)
-        created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
+        created_at = db_instance.Column(
+            db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
         category = db_instance.Column(db_instance.String(50), nullable=True)
-        
+
         # 添加数据库级别的检查约束，确保金额大于0
         __table_args__ = (
-            db_instance.CheckConstraint('amount > 0', name='check_income_amount_positive'),
+            db_instance.CheckConstraint(
+                'amount > 0', name='check_income_amount_positive'),
         )
-        
+
         def __repr__(self):
             return f'Income(name="{self.name}", amount={self.amount}, date={self.created_at.date()})'
-        
+
         def to_dict(self):
             """将模型转换为字典格式"""
             return {
@@ -110,24 +118,26 @@ def setup_models(db_instance):
                 'description': self.description,
                 'category': self.category
             }
-    
+
     class Expense(db_instance.Model):
         """支出数据模型"""
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         name = db_instance.Column(db_instance.String(100), nullable=False)
         amount = db_instance.Column(db_instance.Float, nullable=False)
         category = db_instance.Column(db_instance.String(50), nullable=True)
-        created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
+        created_at = db_instance.Column(
+            db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
-        
+
         # 添加数据库级别的检查约束，确保金额大于0
         __table_args__ = (
-            db_instance.CheckConstraint('amount > 0', name='check_expense_amount_positive'),
+            db_instance.CheckConstraint(
+                'amount > 0', name='check_expense_amount_positive'),
         )
-        
+
         def __repr__(self):
             return f'Expense(name="{self.name}", amount={self.amount}, category={self.category}, date={self.created_at.date()})'
-        
+
         def to_dict(self):
             """将模型转换为字典格式"""
             return {
@@ -138,7 +148,7 @@ def setup_models(db_instance):
                 'created_at': self.created_at.isoformat() if self.created_at else None,
                 'description': self.description
             }
-    
+
     class Goal(db_instance.Model):
         """财务目标数据模型"""
         id = db_instance.Column(db_instance.Integer, primary_key=True)
@@ -146,12 +156,13 @@ def setup_models(db_instance):
         target_amount = db_instance.Column(db_instance.Float, nullable=False)
         current_amount = db_instance.Column(db_instance.Float, default=0.0)
         deadline = db_instance.Column(db_instance.Date, nullable=True)
-        created_at = db_instance.Column(db_instance.DateTime, default=datetime.utcnow)
+        created_at = db_instance.Column(
+            db_instance.DateTime, default=datetime.utcnow)
         description = db_instance.Column(db_instance.Text, nullable=True)
-        
+
         def __repr__(self):
             return f'Goal(name="{self.name}", target={self.target_amount}, current={self.current_amount})'
-        
+
         def to_dict(self):
             """将模型转换为字典格式"""
             return {
@@ -163,5 +174,5 @@ def setup_models(db_instance):
                 'created_at': self.created_at.isoformat() if self.created_at else None,
                 'description': self.description
             }
-    
+
     return Income, Expense, Goal
